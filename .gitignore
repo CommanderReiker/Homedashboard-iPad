@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+.DS_Store
+test-results/
+
+private/
+*.private.yaml
+*-persoenlich.yaml
+.env

@@ -1,0 +1,12 @@
+{
+  "name": "homedashboard-ipad",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check www/home-dashboard/home-dashboard.js",
+    "build": "node tools/build.mjs",
+    "check:dist": "node tools/build.mjs --check && node --check dist/Homedashboard-iPad.js"
+  }
+}
