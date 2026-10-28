@@ -1,4 +1,4 @@
-# Home Dashboard iPad · V2.0.0
+# Home Dashboard iPad · V2.1.0
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
@@ -7,7 +7,7 @@ Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im
 ## Funktionen
 
 - Raumtemperatur, Luftfeuchte, CO₂ und optional Niederschlagsmenge; Temperatur-Min/Max aus der HA-Historie.
-- Tibber-Preisverlauf für heute und automatisch auch morgen, sobald Preise vorhanden sind.
+- Tibber-Preisverlauf für heute und automatisch auch morgen, sobald Preise vorhanden sind. Antippen öffnet die Großansicht mit verschiebbarem Cursor, Zeitintervall und Preis in ct/kWh.
 - Weather Radar Card mit DWD, 60 Minuten Vergangenheit, 60 Minuten Vorhersage und Zoomstufe 8.
 - Stunden- und Tageswetter, Fahrzeugstatus, PV-Leistung, Tagesertrag und Speicher-SOC.
 - Gemeinsame Kalenderliste für heute und morgen, automatischer Seitenwechsel.
@@ -29,7 +29,7 @@ Entwickelt für ein 9,7-Zoll-iPad im Querformat, beispielsweise iPad der 6. Gene
 5. Ein eigenes Dashboard mit einer Panel-Ansicht und `type: custom:home-dashboard` anlegen. Entitäten lokal konfigurieren, siehe [Konfiguration](docs/CONFIGURATION.md). Das öffentliche [Beispiel](dashboard/dashboard.example.yaml) verwendet ausschließlich erfundene IDs.
 6. Browser vollständig neu laden. Die Karte zeigt die vollständige Versionsnummer an.
 
-Die Weather Radar Card muss separat über HACS installiert sein. Wetter-, Tibber- und Kalenderintegrationen werden nicht durch die Karte installiert. Für den Preisverlauf wird die offizielle HA-Aktion `tibber.get_prices` benötigt. Ohne passende Konfiguration werden keine Kalender-, Wetter-, Tibber- oder Temperaturhistorienabfragen ausgelöst. Das Radar verwendet weiterhin die im eigenen HA vorhandene Kartenposition und kontaktiert seinen Datenanbieter.
+Die Weather Radar Card muss separat über HACS installiert sein. Wetter-, Tibber- und Kalenderintegrationen werden nicht durch die Karte installiert. Für den Preisverlauf wird die offizielle HA-Aktion `tibber.get_prices` benötigt. Ohne passende Konfiguration werden keine Kalender-, Wetter-, Tibber- oder Temperaturhistorienabfragen ausgelöst. Zur möglichen Erweiterung um Wolken siehe [Regenradar und Wolken](docs/CONFIGURATION.md#regenradar-und-wolken). Das Radar verwendet weiterhin die im eigenen HA vorhandene Kartenposition und kontaktiert seinen Datenanbieter.
 
 ## Updates und eigene Daten
 

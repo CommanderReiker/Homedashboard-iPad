@@ -13,7 +13,7 @@ threading.Thread(target=server.serve_forever, daemon=True).start()
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path='/usr/bin/chromium', headless=True, args=['--no-sandbox'])
-        page = browser.new_page(viewport={'width': 1024, 'height': 768}, device_scale_factor=1)
+        page = browser.new_page(has_touch=True, viewport={'width': 1024, 'height': 768}, device_scale_factor=1)
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.goto(f'http://127.0.0.1:{server.server_port}/tests/demo.html' + ('?bundle' if os.environ.get('HACS_BUNDLE') else ''))
@@ -52,6 +52,54 @@ try:
         page.evaluate('window.mockHass.states["sensor.demo_room_8_rain"].state="unavailable"; window.dashboard._render()')
         assert '—' in rain.inner_text()
         page.evaluate('window.mockHass.states["sensor.demo_room_8_rain"].state="2.4"; window.mockHass.states["sensor.demo_room_1_co2"].state="840"; window.dashboard._render()')
+        # Open the large price chart with touch, select an exact interval, drag,
+        # and navigate with the keyboard. Preserve the selection across HA renders.
+        opener = root.locator('.price-open').bounding_box()
+        page.touchscreen.tap(opener['x'] + opener['width']/2, opener['y'] + opener['height']/2)
+        dialog = root.locator('.price-dialog')
+        assert dialog.evaluate('(e)=>e.open')
+        chart = dialog.locator('svg')
+        def chart_point(fraction):
+            return chart.evaluate('(e,f)=>{const p=e.createSVGPoint();p.x=38+304*f;p.y=80;const q=p.matrixTransform(e.getScreenCTM());return {x:q.x,y:q.y}}', fraction)
+        def assert_selected(index):
+            result = page.evaluate('(i)=>{const p=window.dashboard._data.prices[i]; return {time:p.time,price:p.price.toLocaleString("de-DE",{maximumFractionDigits:6})}}', index)
+            assert page.evaluate('window.dashboard._selectedPriceTime') == result['time']
+            assert result['price'] + ' ct/kWh' in dialog.locator('output').inner_text()
+            assert dialog.locator('.price-cursor').get_attribute('d').startswith('M')
+        point = chart_point(0.252)
+        page.touchscreen.tap(point['x'], point['y'])
+        assert_selected(48)
+        page.evaluate('window.dashboard._render()')
+        assert_selected(48)
+        point = chart_point(0.002)
+        page.mouse.move(point['x'], point['y'])
+        page.mouse.down()
+        point = chart_point(0.999)
+        page.mouse.move(point['x'], point['y'])
+        page.mouse.up()
+        assert_selected(191)
+        slider = dialog.locator('input')
+        slider.focus()
+        page.keyboard.press('Home')
+        assert_selected(0)
+        page.keyboard.press('ArrowRight')
+        assert_selected(1)
+        page.keyboard.press('Escape')
+        assert not dialog.evaluate('(e)=>e.open')
+        page.wait_for_function('window.dashboard.shadowRoot.activeElement === window.dashboard.shadowRoot.querySelector(".price-open")')
+        # Negative prices remain signed, tomorrow is unambiguous, empty data is safe.
+        page.evaluate('window.originalPrice=window.dashboard._data.prices[96].price;window.dashboard._data.prices[96].price=-1.23456')
+        root.locator('.price-open').click()
+        point = chart_point(0.502)
+        page.mouse.click(point['x'], point['y'])
+        assert_selected(96)
+        assert '-1,23456 ct/kWh' in dialog.locator('output').inner_text()
+        assert page.evaluate('window.dashboard._time(new Date(window.dashboard._selectedPriceTime))') == '00:00'
+        page.evaluate('window.savedPrices=window.dashboard._data.prices;window.dashboard._data.prices=[];window.dashboard._render()')
+        assert 'Keine Preisdaten' in dialog.locator('output').inner_text()
+        assert slider.is_disabled()
+        dialog.locator('.price-close').click()
+        page.evaluate('window.dashboard._data.prices=window.savedPrices;window.dashboard._data.prices[96].price=window.originalPrice;window.dashboard._render()')
         assert root.locator('#calendar .event').count() == 4
         assert root.locator('#night button').count() == 0
         assert root.locator('#radar .radar-cover').evaluate('(e)=>getComputedStyle(e).pointerEvents') == 'none'
@@ -68,6 +116,12 @@ try:
         # Today-only fallback and unavailable-state rendering.
         page.evaluate('window.dashboard._data.prices=window.dashboard._data.prices.slice(0,96); window.mockHass.states["sensor.demo_vehicle_soc"].state="unavailable"; window.dashboard._render()')
         assert 'morgen' not in root.locator('#price h2').inner_text()
+        root.locator('.price-open').click()
+        point = chart_point(0.999)
+        page.mouse.click(point['x'], point['y'])
+        assert_selected(95)
+        assert dialog.locator('input').get_attribute('max') == '95'
+        dialog.locator('.price-close').click()
         assert '—' in root.locator('#car .big').inner_text()
         # The sole optional command targets exactly the approved HA script.
         page.evaluate('window.dashboard.setConfig({...window.demoConfig,allow_night_action:true}); window.dashboard.hass=window.mockHass')
@@ -88,7 +142,7 @@ try:
         page.evaluate('window.mockHass.states["sensor.demo_vehicle_soc"].state="59"; window.dashboard.setConfig({...window.demoConfig,allow_night_action:false}); window.dashboard.hass=window.mockHass')
         page.wait_for_function('window.dashboard._data.prices?.length === 192')
         if not os.environ.get('HACS_BUNDLE'):
-            page.screenshot(path=str(ROOT/'docs/demo.png'), full_page=True)
+            page.screenshot(path=os.environ.get('DEMO_SCREENSHOT', str(ROOT/'docs/demo.png')), full_page=True)
         # A fresh card without configuration must not query an installation.
         before = page.evaluate('window.calls.length')
         page.evaluate('window.dashboard.setConfig({}); window.dashboard.hass=window.mockHass')
@@ -98,6 +152,6 @@ try:
         assert root.locator('#night button').count() == 0
         assert not errors, errors
         browser.close()
-        print('PASS: iPad layout, service responses, calendar escaping, today-only fallback, locked display, optional night action')
+        print('PASS: interactive price detail (touch, drag, keyboard, negative prices, empty data, today-only), iPad layout, service responses, calendar escaping, today-only fallback, locked display, optional night action')
 finally:
     server.shutdown()
