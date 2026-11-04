@@ -30,7 +30,7 @@ try:
         page.evaluate('window.dashboard._data.daily.forEach(f=>{f.temperature=14.7;f.templow=6.7}); window.dashboard._data.hourly.forEach(f=>f.temperature=9.8); window.dashboard._render()')
         for width, height in [(1024, 768), (960, 700), (1280, 800)]:
             page.set_viewport_size({'width': width, 'height': height})
-            for selector, parent in [('#climate .room', '#climate'), ('#weather .days>div', '#weather'), ('#weather .hours>div', '#weather'), ('#pv .energy-values', '#pv')]:
+            for selector, parent in [('#climate .room', '#climate'), ('#weather .days>div', '#weather'), ('#weather .hours>div', '#weather'), ('#pv .energy-values', '#pv'), ('#car>*', '#car')]:
                 boundary = root.locator(parent).bounding_box()
                 for element in root.locator(selector).all():
                     box = element.bounding_box()
@@ -39,6 +39,11 @@ try:
             for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div']:
                 for element in root.locator(selector).all():
                     assert element.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1 && e.scrollWidth<=e.clientWidth+1'), (width, height, selector)
+        for value, expected in [('0', 'red'), ('19.9', 'red'), ('20', 'yellow'), ('69.9', 'yellow'), ('70', 'green'), ('100', 'green'), ('unavailable', None)]:
+            page.evaluate('(v)=>{window.mockHass.states["sensor.demo_vehicle_soc"].state=v; window.dashboard._render()}', value)
+            classes = root.locator('#car .big').get_attribute('class').split()
+            assert [c for c in classes if c in ('red', 'yellow', 'green')] == ([expected] if expected else []), (value, classes)
+        page.evaluate('window.mockHass.states["sensor.demo_vehicle_soc"].state="59"; window.dashboard._render()')
         page.set_viewport_size({'width':1024,'height':768})
         rain = root.locator('#climate .room').nth(7).locator('.co2')
         assert rain.inner_text().replace('\n', '') == '2,4mm'
