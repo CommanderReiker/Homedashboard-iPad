@@ -1,6 +1,6 @@
-import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema} from './data.js?v=2.1.0';
+import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema} from './data.js?v=2.1.1';
 
-const VERSION='2.1.0';
+const VERSION='2.1.1';
 const DEFAULT_ENTITIES={"current_price": null, "pv_power": null, "pv_energy_today": null, "vehicle_range": null, "vehicle_soc": null, "vehicle_plug": null, "vehicle_charging": null, "vehicle_target_soc": null, "vehicle_charged_today": null};
 const WEATHER={sunny:['☀','Sonnig'],clear:['☀','Klar'],'clear-night':['☾','Klare Nacht'],cloudy:['☁','Bewölkt'],partlycloudy:['⛅','Teils bewölkt'],rainy:['🌧','Regen'],pouring:['🌧','Starkregen'],snowy:['❄','Schnee'],'snowy-rainy':['🌨','Schneeregen'],fog:['≋','Nebel'],windy:['≋','Windig'],'windy-variant':['≋','Windig'],lightning:['ϟ','Gewitter'],'lightning-rainy':['⛈','Gewitter'],hail:['🌨','Hagel'],exceptional:['⚠','Unwetter']};
 export class HomeDashboard extends HTMLElement {
