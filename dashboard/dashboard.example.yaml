@@ -69,3 +69,5 @@ views:
       vehicle_target_soc: sensor.demo_vehicle_target_soc
       vehicle_charged_today: sensor.demo_vehicle_charged_today
     vehicle_name: Demoauto
+    # Optional ab V2.1.2: Name aus einem eigenen Text-Helfer
+    # vehicle_name_entity: input_text.demo_vehicle_name

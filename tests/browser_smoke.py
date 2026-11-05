@@ -115,6 +115,19 @@ try:
             assert box['x'] >= 0 and box['x']+box['width'] <= 1024
             assert box['y']+box['height'] <= 768, box
         assert page.evaluate('window.calls.filter(c=>c.type === "call_service" && c.return_response).length') == 8
+        # Vehicle name entity takes precedence, updates through hass, and stays plain text.
+        assert root.locator('#car h2').inner_text() == '🚘 Demoauto'
+        page.evaluate('window.dashboard.setConfig({...window.demoConfig,vehicle_name:"Fallback",vehicle_name_entity:"input_text.demo_vehicle_name"}); window.dashboard.hass=window.mockHass')
+        assert root.locator('#car h2').inner_text() == '🚘 Fallback'
+        for value, expected in [('  Testauto  ', 'Testauto'), ('Neuer Name', 'Neuer Name'), ('', 'Fallback'), ('   ', 'Fallback'), ('unknown', 'Fallback'), ('unavailable', 'Fallback'), ('<img src=x onerror=alert(1)>', '<img src=x onerror=alert(1)>')]:
+            page.evaluate('(value)=>{window.mockHass.states["input_text.demo_vehicle_name"]={state:value}; window.dashboard.hass=window.mockHass}', value)
+            assert root.locator('#car h2').inner_text() == '🚘 ' + expected
+            assert root.locator('#car h2 img').count() == 0
+        page.evaluate('window.dashboard.setConfig({...window.demoConfig,vehicle_name_entity:"input_text.demo_vehicle_name"}); window.dashboard.hass=window.mockHass')
+        assert root.locator('#car h2').inner_text() == '🚘 <img src=x onerror=alert(1)>'
+        page.evaluate('window.dashboard.setConfig(window.demoConfig); window.dashboard.hass=window.mockHass')
+        assert root.locator('#car h2').inner_text() == '🚘 Demoauto'
+        page.wait_for_function('window.dashboard._busy === false')
         # Calendar content remains plain text, even with hostile titles.
         page.evaluate('window.dashboard._data.events[0].summary = "<img src=x onerror=alert(1)>"; window.dashboard._render()')
         assert root.locator('#calendar img').count() == 0

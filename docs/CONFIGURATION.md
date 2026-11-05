@@ -11,7 +11,8 @@ Eigene Entitäts-IDs gehören in den **Rohkonfigurationseditor des eigenen HA-Da
 | `weather` | Eigene `weather`-Entität; standardmäßig nicht gesetzt |
 | `calendars` | Liste eigener Kalender-IDs; standardmäßig leer |
 | `battery_soc` | Sensor für Speicher-Ladezustand in Prozent; nicht gesetzt |
-| `vehicle_name` | Frei wählbare Fahrzeugbezeichnung; Standard `Auto` |
+| `vehicle_name` | Feste Fahrzeugbezeichnung und Rückfallwert; Standard `Auto` |
+| `vehicle_name_entity` | Optionale Text-Entität für den Fahrzeugnamen; hat bei gültigem Zustand Vorrang vor `vehicle_name` |
 | `entities` | Objekt mit Sensor-/Statuszuordnungen, siehe unten; alle Werte standardmäßig nicht gesetzt |
 | `night_script` | Eigenes Skript; nicht gesetzt |
 | `allow_night_action` | Standard `false`; nur mit konfiguriertem Skript und `true` erscheint ein ausführbarer Knopf |
@@ -34,6 +35,16 @@ Die IDs sind Platzhalter und müssen lokal durch eigene ersetzt werden. Bei fehl
 Erwartete Einheiten: Temperatur °C, Feuchte %, CO₂ ppm. Niederschlag verwendet die Einheit des Sensors, ersatzweise mm. CO₂-Farben: unter 1000 ppm grün, ab 1000 ppm gelb, ab 2000 ppm rot. Fehlende oder nicht verfügbare Messwerte erscheinen als `—`.
 
 ## Strompreis, PV und Fahrzeug
+
+Ab V2.1.2 kann der Fahrzeugname aus einer Text-Entität kommen. Beide Optionen stehen direkt in der Kartenkonfiguration, auf derselben Ebene wie `weather`:
+
+```yaml
+type: custom:home-dashboard
+vehicle_name: Auto
+vehicle_name_entity: input_text.demo_vehicle_name
+```
+
+Die Entitäts-ID durch den eigenen Text-Helfer ersetzen. Angezeigt wird dessen Zustand, nicht sein `friendly_name`. Änderungen werden mit den HA-Zustandsaktualisierungen übernommen. Fehlt die Entität oder ist ihr Zustand leer, `unknown` oder `unavailable`, erscheint stattdessen `vehicle_name`. Ohne `vehicle_name_entity` bleibt der feste Name erhalten.
 
 Unter `entities` stehen folgende optionalen Schlüssel:
 

@@ -1,8 +1,15 @@
-# Home Dashboard iPad · V2.1.1
+# Home Dashboard iPad · V2.1.2
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.1.2
+
+- Fahrzeugname optional aus einer Text-Entität über `vehicle_name_entity`; Änderungen in Home Assistant werden automatisch angezeigt.
+- Bei leerem oder nicht verfügbarem Zustand bleibt `vehicle_name` als Rückfallwert.
+
+Weitere Details: [Releasehinweise V2.1.2](docs/releases/v2.1.2.md).
 
 ## Neu in V2.1.1
 
