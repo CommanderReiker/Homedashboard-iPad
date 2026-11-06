@@ -71,3 +71,30 @@ views:
     vehicle_name: Demoauto
     # Optional ab V2.1.2: Name aus einem eigenen Text-Helfer
     # vehicle_name_entity: input_text.demo_vehicle_name
+
+- title: Heizung
+  path: heating
+  icon: mdi:radiator
+  panel: true
+  cards:
+    - type: custom:home-dashboard
+      view: heating
+      heating:
+        switches:
+          - name: Automatik 1
+            entity: input_boolean.demo_heating_1
+          - name: Automatik 2
+            entity: input_boolean.demo_heating_2
+          - name: Automatik 3
+            entity: input_boolean.demo_heating_3
+          - name: Automatik 4
+            entity: input_boolean.demo_heating_4
+        thermostats:
+          - name: Raum 1
+            entity: climate.demo_heating_1
+          - name: Raum 2
+            entity: climate.demo_heating_2
+          - name: Raum 3
+            entity: climate.demo_heating_3
+          - name: Raum 4
+            entity: climate.demo_heating_4

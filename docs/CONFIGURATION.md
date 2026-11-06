@@ -7,6 +7,8 @@ Eigene Entitäts-IDs gehören in den **Rohkonfigurationseditor des eigenen HA-Da
 | Option | Bedeutung / Standard |
 | --- | --- |
 | `type` | `custom:home-dashboard` |
+| `view` | Standard `home`; `heating` für den separaten [Heizungsreiter](HEATING.md) |
+| `heating` | Lokale Schalter- und Reglerzuordnungen für die Heizungsansicht; standardmäßig leer |
 | `rooms` | Liste von Raumzeilen; leer, solange nicht konfiguriert |
 | `weather` | Eigene `weather`-Entität; standardmäßig nicht gesetzt |
 | `calendars` | Liste eigener Kalender-IDs; standardmäßig leer |

@@ -1,8 +1,18 @@
-# Home Dashboard iPad · V2.1.2
+# Home Dashboard iPad · V2.2.0
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.2.0
+
+- Eigener Reiter **Heizung** als zusätzliche HA-Ansicht: vier Automatikstatusfelder und vier flache Verlaufskacheln im 2×2-Raster.
+- Ist- und Solltemperatur der letzten 24 Stunden, gemeldete Heizphasen und aktuelle Werte; ausschließlich Anzeige.
+- Alle Entitäten bleiben in der eigenen lokalen Dashboard-Konfiguration. [Einrichtung und YAML-Beispiel](docs/HEATING.md).
+
+![Heizungsansicht mit ausschließlich synthetischen Testdaten](docs/heating-demo.png)
+
+Weitere Details: [Releasehinweise V2.2.0](docs/releases/v2.2.0.md).
 
 ## Neu in V2.1.2
 
@@ -72,6 +82,7 @@ Optionaler Offline-Browsercheck mit Python Playwright und Chromium unter `/usr/b
 
 ```sh
 HACS_BUNDLE=1 python tests/browser_smoke.py
+HACS_BUNDLE=1 python tests/heating_browser.py
 ```
 
 Ohne `HACS_BUNDLE=1` wird die Quellversion geprüft und `docs/demo.png` mit synthetischen Daten erzeugt. Geprüft werden Layout, Datenverarbeitung, Konfiguration, deaktivierte Bedienung und der optionale Skriptaufruf mit nachgebildeten HA-Antworten. Das ersetzt keinen Live-Test von HA, DWD oder iPadOS.

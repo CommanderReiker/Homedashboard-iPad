@@ -55,3 +55,36 @@ export function historyExtrema(histories) {
   }
   return out;
 }
+
+// Recorder rows must retain attributes and last_updated: climate changes often
+// leave the HVAC mode (and therefore last_changed) unchanged.
+export function temperatureValue(record, attribute) {
+  if (!record || ['unknown','unavailable'].includes(record.state)) return null;
+  const value=attribute ? record.attributes?.[attribute] : record.state;
+  return value == null || String(value).trim()==='' || !Number.isFinite(Number(value)) ? null : Number(value);
+}
+export function heatingActivity(record, attribute) {
+  if (!record || ['unknown','unavailable'].includes(record.state)) return null;
+  const value=attribute ? record.attributes?.[attribute] : record.state;
+  if (['heating','on'].includes(value)) return 1;
+  return ['idle','off','cooling','drying','fan','defrosting'].includes(value) ? 0 : null;
+}
+export function historySeries(history, read, start, end) {
+  const rows=(history || []).map(row=>({time:Date.parse(row.last_updated || row.last_changed),value:read(row)}))
+    .filter(p=>Number.isFinite(p.time)&&p.time<=end).sort((a,b)=>a.time-b.time);
+  const points=[];
+  for (const row of rows) {
+    const point={...row,time:Math.max(start,row.time)};
+    if (points.at(-1)?.time===point.time) points[points.length-1]=point;
+    else points.push(point);
+  }
+  return points;
+}
+export function heatingSeries(histories, room, start, end) {
+  const byId=new Map((histories || []).map(rows=>[rows.find(row=>row.entity_id)?.entity_id,rows]));
+  return {
+    actual:historySeries(byId.get(room.temperature_entity || room.entity),r=>temperatureValue(r,room.temperature_entity?null:'current_temperature'),start,end),
+    target:historySeries(byId.get(room.target_entity || room.entity),r=>temperatureValue(r,room.target_entity?null:'temperature'),start,end),
+    activity:historySeries(byId.get(room.heating_entity || room.entity),r=>heatingActivity(r,room.heating_entity?null:'hvac_action'),start,end)
+  };
+}

@@ -1,0 +1,26 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Heizung – synthetische Testdaten</title>
+<style>body{margin:0;padding-left:56px;background:#17191b;font-family:sans-serif}.demo-label{height:56px;box-sizing:border-box;padding:8px 20px;color:#aaa;font-size:12px}</style>
+<div class="demo-label">Heizung · künstliche Testdaten · kein Live-Zugriff auf Home Assistant</div>
+<script type="module">
+await import(new URLSearchParams(location.search).has('bundle') ? '../dist/Homedashboard-iPad.js' : '../www/home-dashboard/home-dashboard.js');
+window.heatingConfig={type:'custom:home-dashboard',view:'heating',heating:{
+ switches:Array.from({length:4},(_,i)=>({name:`Automatik ${i+1}`,entity:`input_boolean.demo_heating_${i+1}`})),
+ thermostats:Array.from({length:4},(_,i)=>({name:`Raum ${i+1}`,entity:`climate.demo_heating_${i+1}`}))
+}};
+window.calls=[];window.failHistory=false;window.emptyHistory=false;
+const states={};
+for(let i=1;i<=4;i++){
+ states[`input_boolean.demo_heating_${i}`]={state:['on','off','unavailable','unknown'][i-1]};
+ states[`climate.demo_heating_${i}`]={state:'heat',attributes:{current_temperature:21.2+i*.2,temperature:22,hvac_action:i%2?'heating':'idle'}};
+}
+window.mockHass={config:{time_zone:'Europe/Berlin',unit_system:{temperature:'°C'}},states,
+ async callApi(method,path){
+  window.calls.push({method,path});if(window.failHistory)throw Error('Synthetic failure');if(window.historyGate)await window.historyGate;
+  if(window.emptyHistory)return [];
+  const start=Date.parse(decodeURIComponent(path.split('history/period/')[1].split('?')[0]));
+  return heatingConfig.heating.thermostats.map((r,i)=>Array.from({length:97},(_,n)=>({entity_id:r.entity,state:'heat',last_changed:new Date(start).toISOString(),last_updated:new Date(start+n*900000).toISOString(),attributes:{current_temperature:21.5+i*.15+.6*Math.sin(n/10),temperature:n<28?20:n<65?22:21,hvac_action:n>=28&&n<65&&n%6<4?'heating':'idle'}})));
+ },
+ async callService(){throw Error('Heating must be read-only');},async callWS(){throw Error('Heating must not query other services');}
+};
+window.dashboard=document.createElement('home-dashboard');dashboard.setConfig(heatingConfig);document.body.append(dashboard);dashboard.hass=mockHass;
+</script></html>

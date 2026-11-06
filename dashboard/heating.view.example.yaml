@@ -1,0 +1,28 @@
+# Nur synthetische Platzhalter. Lokal unter views: ergänzen.
+# Nicht das bestehende Zuhause-Dashboard ersetzen.
+title: Heizung
+path: heating
+icon: mdi:radiator
+panel: true
+cards:
+  - type: custom:home-dashboard
+    view: heating
+    heating:
+      switches:
+        - name: Automatik 1
+          entity: input_boolean.demo_heating_1
+        - name: Automatik 2
+          entity: input_boolean.demo_heating_2
+        - name: Automatik 3
+          entity: input_boolean.demo_heating_3
+        - name: Automatik 4
+          entity: input_boolean.demo_heating_4
+      thermostats:
+        - name: Raum 1
+          entity: climate.demo_heating_1
+        - name: Raum 2
+          entity: climate.demo_heating_2
+        - name: Raum 3
+          entity: climate.demo_heating_3
+        - name: Raum 4
+          entity: climate.demo_heating_4
