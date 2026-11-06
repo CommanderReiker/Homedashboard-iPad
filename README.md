@@ -1,8 +1,17 @@
-# Home Dashboard iPad · V2.3.0
+# Home Dashboard iPad · V2.4.0
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.0
+
+- Flachere Gute-Nacht-Kachel und mehr Höhe für Raumklima.
+- Optionale PM2.5-Zeile direkt über dem letzten Raum-/Außensensor: aktueller Wert, Tages-Minimum und -Maximum aus der HA-Historie.
+- Neue lokale Kartenoption `pm25`; acht Temperaturzeilen plus PM2.5 im iPad-Layout geprüft.
+- [PM2.5 konfigurieren](docs/CONFIGURATION.md#pm25-mit-tages-minimum-und--maximum); das Beispielbild oben wurde mit synthetischen Werten erneuert.
+
+Weitere Details: [Releasehinweise V2.4.0](docs/releases/v2.4.0.md).
 
 ## Neu in V2.3.0
 
@@ -39,7 +48,7 @@ Weitere Details: [Releasehinweise V2.1.1](docs/releases/v2.1.1.md).
 
 ## Funktionen
 
-- Raumtemperatur, Luftfeuchte, CO₂ und optional Niederschlagsmenge; Temperatur-Min/Max aus der HA-Historie.
+- Raumtemperatur, Luftfeuchte, CO₂ und optional Niederschlagsmenge sowie PM2.5; Tages-Min/Max für Temperatur und PM2.5 aus der HA-Historie.
 - Tibber-Preisverlauf für heute und automatisch auch morgen, sobald Preise vorhanden sind. Antippen öffnet die Großansicht mit verschiebbarem Cursor, Zeitintervall und Preis in ct/kWh.
 - Weather Radar Card mit DWD, 60 Minuten Vergangenheit, 60 Minuten Vorhersage und Zoomstufe 8.
 - Stunden- und Tageswetter, Fahrzeugstatus, Strom-Tagesverbrauch und Tageskosten, PV-Leistung, Tagesertrag und Speicher-SOC.

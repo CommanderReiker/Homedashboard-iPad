@@ -7,6 +7,8 @@ views:
   - type: custom:home-dashboard
     weather: weather.demo
     battery_soc: sensor.demo_storage_soc
+    # Optional: eigene PM2.5-Entität, auf Kartenebene
+    pm25: sensor.demo_pm25
     rooms:
     - - Raum 1
       - sensor.demo_room_1_temperature
@@ -36,7 +38,7 @@ views:
       - sensor.demo_room_7_temperature
       - sensor.demo_room_7_humidity
       - sensor.demo_room_7_co2
-    - - Raum 8
+    - - Außen
       - sensor.demo_room_8_temperature
       - sensor.demo_room_8_humidity
       - null

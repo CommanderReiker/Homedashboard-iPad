@@ -23,12 +23,18 @@ try:
         radar_config = page.evaluate('window.dashboard._radar.config')
         assert radar_config == {'type':'custom:weather-radar-card', 'height':'100%', 'data_source':'DWD', 'past_minutes':60, 'forecast_minutes':60, 'forecast_refresh_minutes':15, 'zoom_level':8}
         assert root.locator('#price').inner_text().find('heute + morgen') >= 0
-        assert root.locator('#climate .room').count() == 8
+        assert root.locator('#climate .room').count() == 9
         assert 'Strom, BKW & Batterie' in root.locator('#pv h2').inner_text()
         assert '73%' in root.locator('#pv .battery').inner_text()
         assert '8,42' in root.locator('#pv .consumption').inner_text()
         assert '2,34' in root.locator('#pv .cost').inner_text()
         assert '€' in root.locator('#pv .cost').inner_text()
+        assert root.locator('#climate .room').nth(7).get_attribute('class') == 'room pm25'
+        assert root.locator('#climate .room').last.locator('strong').inner_text() == 'Außen'
+        assert root.locator('.pm25-current').inner_text() == '6,4'
+        assert root.locator('.pm25-range b').all_inner_texts() == ['2,1','14,8']
+        assert 'µg/m³' in root.locator('.pm25').inner_text()
+        assert page.evaluate('window.historyCalls[0].path.includes("sensor.demo_pm25")')
         # Check the actual content, not only outer tiles, with HA chrome and decimals.
         page.evaluate('window.dashboard._data.daily.forEach(f=>{f.temperature=14.7;f.templow=6.7}); window.dashboard._data.hourly.forEach(f=>f.temperature=9.8); window.dashboard._render()')
         for width, height in [(1024, 768), (960, 700), (1280, 800)]:
@@ -38,6 +44,10 @@ try:
                 for element in root.locator(selector).all():
                     box = element.bounding_box()
                     assert box['y'] >= boundary['y'] and box['y'] + box['height'] <= boundary['y'] + boundary['height'] - 8, (width, height, selector, box, boundary)
+            assert abs(root.locator('#night').bounding_box()['height']-64) <= 1
+            assert root.locator('#climate').bounding_box()['height'] > root.locator('#climate').bounding_box()['width']
+            for el in root.locator('#night>*').all():
+                assert el.evaluate('(e)=>e.scrollWidth<=e.clientWidth+1 && e.scrollHeight<=e.clientHeight+1')
             energy_box = root.locator('#pv').bounding_box()
             calendar_box = root.locator('#calendar').bounding_box()
             price_box = root.locator('#price').bounding_box()
@@ -47,13 +57,23 @@ try:
             for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div', '#pv .energy-values>div']:
                 for element in root.locator(selector).all():
                     assert element.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1 && e.scrollWidth<=e.clientWidth+1'), (width, height, selector)
+        # The left-column wrapper returns to the existing narrow layout.
+        for width in [760,600]:
+            page.set_viewport_size({'width':width,'height':1024})
+            assert root.locator('#climate .room').count() == 9
+            assert root.locator('.left-column').evaluate('(e)=>getComputedStyle(e).display') == 'contents'
+            for el in root.locator('#climate .room').all():
+                b=el.bounding_box()
+                assert b['x']>=0 and b['x']+b['width']<=width
+            assert abs(root.locator('#night').bounding_box()['height']-64)<=1
+        page.set_viewport_size({'width':1280,'height':800})
         for value, expected in [('0', 'red'), ('19.9', 'red'), ('20', 'yellow'), ('69.9', 'yellow'), ('70', 'green'), ('100', 'green'), ('unavailable', None)]:
             page.evaluate('(v)=>{window.mockHass.states["sensor.demo_vehicle_soc"].state=v; window.dashboard._render()}', value)
             classes = root.locator('#car .big').get_attribute('class').split()
             assert [c for c in classes if c in ('red', 'yellow', 'green')] == ([expected] if expected else []), (value, classes)
         page.evaluate('window.mockHass.states["sensor.demo_vehicle_soc"].state="59"; window.dashboard._render()')
         page.set_viewport_size({'width':1024,'height':768})
-        rain = root.locator('#climate .room').nth(7).locator('.co2')
+        rain = root.locator('#climate .room').last.locator('.co2')
         assert rain.inner_text().replace('\n', '') == '2,4mm'
         assert rain.get_attribute('title') == 'Niederschlag heute'
         assert 'ppm' not in rain.inner_text()
@@ -167,12 +187,34 @@ try:
         assert dialog.locator('input').get_attribute('max') == '95'
         dialog.locator('.price-close').click()
         assert '—' in root.locator('#car .big').inner_text()
+        # PM2.5 updates through hass, including zero and unavailable values.
+        for value, expected in [('0','0,0'), ('unavailable','—'), ('unknown','—')]:
+            page.evaluate('(value)=>{window.mockHass.states["sensor.demo_pm25"].state=value;window.dashboard.hass=window.mockHass}', value)
+            assert root.locator('.pm25-current').inner_text() == expected
+        page.evaluate('window.emptyPmHistory=true;window.dashboard._last.extrema=0;window.dashboard.hass=window.mockHass')
+        page.wait_for_function('!window.dashboard._busy')
+        assert root.locator('.pm25-range b').all_inner_texts() == ['—','—']
+        page.evaluate('window.emptyPmHistory=false;window.failExtrema=true;window.dashboard._last.extrema=0;window.dashboard.hass=window.mockHass')
+        page.wait_for_function('!window.dashboard._busy')
+        assert root.locator('.pm25-range b').all_inner_texts() == ['—','—']
+        assert 'Historie nicht abrufbar' in root.locator('#climate').inner_text()
+        page.evaluate('window.failExtrema=false;window.mockHass.states["sensor.demo_pm25"].state="6.4"')
         # The sole optional command targets exactly the approved HA script.
         page.evaluate('window.dashboard.setConfig({...window.demoConfig,allow_night_action:true}); window.dashboard.hass=window.mockHass')
         root.locator('#night button').click()
         page.wait_for_function('window.calls.some(c=>c.service === "turn_on")')
         call = page.evaluate('window.calls.find(c=>c.service === "turn_on")')
         assert call == {'domain':'script','service':'turn_on','data':{'entity_id':'script.demo_good_night'}}
+        for width,height in [(1024,768),(960,700),(1280,800)]:
+            page.set_viewport_size({'width':width,'height':height})
+            night_box=root.locator('#night').bounding_box()
+            assert abs(night_box['height']-64)<=1
+            assert root.locator('#night button').bounding_box()['height']>=44
+            for el in root.locator('#night>*').all():
+                b=el.bounding_box()
+                assert b['x']>=night_box['x'] and b['x']+b['width']<=night_box['x']+night_box['width']
+                assert b['y']>=night_box['y'] and b['y']+b['height']<=night_box['y']+night_box['height']
+        page.set_viewport_size({'width':1024,'height':768})
         page.evaluate('window.dashboard._config.battery_soc="sensor.custom_soc"; window.mockHass.states["sensor.custom_soc"]={state:"0"}; window.dashboard._render()')
         assert '0%' in root.locator('#pv .battery').inner_text()
         page.evaluate('window.mockHass.states["sensor.custom_soc"].state="unavailable"; window.dashboard._render()')
@@ -187,6 +229,15 @@ try:
         page.wait_for_function('window.dashboard._data.prices?.length === 192')
         if not os.environ.get('HACS_BUNDLE'):
             page.screenshot(path=os.environ.get('DEMO_SCREENSHOT', str(ROOT/'docs/demo.png')), full_page=True)
+        page.evaluate('window.dashboard.setConfig({...window.demoConfig,pm25:null});window.dashboard.hass=window.mockHass')
+        page.wait_for_function('!window.dashboard._busy')
+        assert root.locator('.pm25').count() == 0
+        assert root.locator('#climate .room').count() == 8
+        assert page.evaluate('!window.historyCalls.at(-1).path.includes("sensor.demo_pm25")')
+        page.evaluate('window.dashboard.setConfig({pm25:"sensor.demo_pm25"});window.dashboard.hass=window.mockHass')
+        page.wait_for_function('!window.dashboard._busy')
+        assert root.locator('#climate .room').count() == 1
+        assert root.locator('.pm25-current').inner_text() == '6,4'
         # A fresh card without configuration must not query an installation.
         before = page.evaluate('window.calls.length')
         page.evaluate('window.dashboard.setConfig({}); window.dashboard.hass=window.mockHass')

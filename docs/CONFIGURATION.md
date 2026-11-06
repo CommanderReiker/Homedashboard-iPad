@@ -9,7 +9,8 @@ Eigene Entitäts-IDs gehören in den **Rohkonfigurationseditor des eigenen HA-Da
 | `type` | `custom:home-dashboard` |
 | `view` | Standard `home`; `heating` für den separaten [Heizungsreiter](HEATING.md) |
 | `heating` | Lokale Schalter- und Reglerzuordnungen für die Heizungsansicht; standardmäßig leer |
-| `rooms` | Liste von Raumzeilen; leer, solange nicht konfiguriert |
+| `rooms` | Liste von Raumzeilen; leer, solange nicht konfiguriert; Außensensor als letzten Eintrag führen |
+| `pm25` | Optionale Sensor-ID für PM2.5 mit aktuellem Wert und Tages-Min/Max; nicht gesetzt |
 | `weather` | Eigene `weather`-Entität; standardmäßig nicht gesetzt |
 | `calendars` | Liste eigener Kalender-IDs; standardmäßig leer |
 | `battery_soc` | Sensor für Speicher-Ladezustand in Prozent; nicht gesetzt |
@@ -32,9 +33,28 @@ rooms:
   - [Außen, sensor.demo_outside_temperature, sensor.demo_outside_humidity, null, sensor.demo_rain_today]
 ```
 
-Die IDs sind Platzhalter und müssen lokal durch eigene ersetzt werden. Bei fehlendem CO₂-Sensor `null` verwenden. Die optionale fünfte ID zeigt Niederschlag statt CO₂. Bis zu acht Zeilen sind im iPad-Layout geprüft; viele weitere Zeilen oder vergrößerte Systemschrift können mehr Platz benötigen. Die Historie wird nur für die angegebenen Temperatursensoren abgefragt.
+Die IDs sind Platzhalter und müssen lokal durch eigene ersetzt werden. Bei fehlendem CO₂-Sensor `null` verwenden. Die optionale fünfte ID zeigt Niederschlag statt CO₂. Bis zu acht Temperaturzeilen plus einer optionalen PM2.5-Zeile sind im iPad-Layout geprüft; viele weitere Zeilen oder vergrößerte Systemschrift können mehr Platz benötigen. Die Historie wird nur für die angegebenen Temperatursensoren und den optionalen PM2.5-Sensor abgefragt.
 
 Erwartete Einheiten: Temperatur °C, Feuchte %, CO₂ ppm. Niederschlag verwendet die Einheit des Sensors, ersatzweise mm. CO₂-Farben: unter 1000 ppm grün, ab 1000 ppm gelb, ab 2000 ppm rot. Fehlende oder nicht verfügbare Messwerte erscheinen als `—`.
+
+### PM2.5 mit Tages-Minimum und -Maximum
+
+Ab V2.4.0 wird die Gute-Nacht-Kachel flacher (64 Pixel); der frei gewordene Platz vergrößert die Raumklima-Kachel. Eine optionale Partikelzeile steht direkt **vor dem letzten Eintrag** von `rooms`. Den Außensensor deshalb als letzte Raumzeile belassen. Die übrigen Raumzeilen werden nicht ersetzt oder entfernt.
+
+Die Sensor-ID auf **Kartenebene** neben `weather`, `battery_soc` und `rooms` ergänzen, nicht unter `entities` oder in der Raumliste:
+
+```yaml
+type: custom:home-dashboard
+pm25: sensor.demo_pm25  # lokal durch die eigene Sensor-ID ersetzen
+```
+
+Die Zeile zeigt **PM2.5**, den aktuellen Wert sowie **Min heute** und **Max heute**. Die Einheit kommt aus `unit_of_measurement` des Sensors, ersatzweise `µg/m³`. Es erfolgt keine Einheitenumrechnung oder Bewertung mit Gesundheitsgrenzwerten.
+
+Die Tagesextrema werden aus der HA-Historie **ab Mitternacht in der HA-Zeitzone bis jetzt** berechnet, zusammen mit den Temperatur-Min/Max-Werten in einer gemeinsamen Abfrage. Das geschieht alle 15 Minuten, solange die Seite aktiv ist; der aktuelle Wert aktualisiert sich unabhängig davon mit den HA-Zuständen. Voraussetzung für Tages-Min/Max ist, dass der HA-Recorder den PM2.5-Sensor aufzeichnet. Es sind die Extrema der verfügbaren aufgezeichneten Werte, keine Hochrechnung.
+
+Unbekannte oder nicht verfügbare Zustände erscheinen als `—`; echte Nullwerte bleiben `0,0`. Bei leerer Historie oder fehlgeschlagenem Abruf erscheinen die Tagesextrema als `—`. Ein Abruffehler erhält zusätzlich einen Hinweis in der Raumklima-Kachel. Ohne `pm25`-Zuordnung entfällt die zusätzliche Zeile und es wird dafür keine Historie angefragt. PM2.5 lässt sich auch ohne konfigurierte Temperaturzeilen anzeigen.
+
+Die Gute-Nacht-Funktion bleibt standardmäßig gesperrt. Falls sie ausdrücklich freigegeben ist, bleibt der Knopf trotz kleinerer Kachel mindestens 44 Pixel hoch.
 
 ## Strompreis, PV und Fahrzeug
 
