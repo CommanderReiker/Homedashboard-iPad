@@ -1,8 +1,16 @@
-# Home Dashboard iPad · V2.4.0
+# Home Dashboard iPad · V2.4.1
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.1
+
+- Mehr Höhe für den Kalender durch eine flachere Stromkachel.
+- Bis zu vier Termine gleichzeitig, mit Tag/Uhrzeit neben dem Titel. Bei mehr Einträgen automatischer Seitenwechsel alle 15 Sekunden.
+- Alle Stromwerte bleiben sichtbar; die lokale YAML bleibt unverändert. Beispielbild oben aktualisiert.
+
+Weitere Details: [Releasehinweise V2.4.1](docs/releases/v2.4.1.md).
 
 ## Neu in V2.4.0
 

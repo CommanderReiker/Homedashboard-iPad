@@ -53,10 +53,20 @@ try:
             price_box = root.locator('#price').bounding_box()
             assert energy_box['y'] > price_box['y'] and calendar_box['y'] > energy_box['y'] + energy_box['height']
             assert abs(energy_box['x'] - calendar_box['x']) < 1
+            assert calendar_box['height'] >= 140
+            assert energy_box['height'] < 190
+            assert root.locator('#calendar .event').count() == 4
             # Last room's min/max and each forecast's text must fit inside their rows.
-            for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div', '#pv .energy-values>div']:
+            for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div', '#pv .energy-values>div', '#calendar .event>div']:
                 for element in root.locator(selector).all():
                     assert element.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1 && e.scrollWidth<=e.clientWidth+1'), (width, height, selector)
+        page.evaluate('window.dashboard._calendarFailures=1;window.dashboard._render()')
+        page.set_viewport_size({'width':960,'height':700})
+        calendar_box=root.locator('#calendar').bounding_box()
+        for el in root.locator('#calendar>*').all():
+            b=el.bounding_box()
+            assert b['y']+b['height'] <= calendar_box['y']+calendar_box['height']-8
+        page.evaluate('window.dashboard._calendarFailures=0;window.dashboard._render()')
         # The left-column wrapper returns to the existing narrow layout.
         for width in [760,600]:
             page.set_viewport_size({'width':width,'height':1024})
@@ -66,6 +76,11 @@ try:
                 b=el.bounding_box()
                 assert b['x']>=0 and b['x']+b['width']<=width
             assert abs(root.locator('#night').bounding_box()['height']-64)<=1
+            assert root.locator('#calendar .event').count()==4
+            calendar_box=root.locator('#calendar').bounding_box()
+            for el in root.locator('#calendar>*').all():
+                b=el.bounding_box()
+                assert b['y']+b['height']<=calendar_box['y']+calendar_box['height']
         page.set_viewport_size({'width':1280,'height':800})
         for value, expected in [('0', 'red'), ('19.9', 'red'), ('20', 'yellow'), ('69.9', 'yellow'), ('70', 'green'), ('100', 'green'), ('unavailable', None)]:
             page.evaluate('(v)=>{window.mockHass.states["sensor.demo_vehicle_soc"].state=v; window.dashboard._render()}', value)
@@ -133,7 +148,7 @@ try:
         assert slider.is_disabled()
         dialog.locator('.price-close').click()
         page.evaluate('window.dashboard._data.prices=window.savedPrices;window.dashboard._data.prices[96].price=window.originalPrice;window.dashboard._render()')
-        assert root.locator('#calendar .event').count() == 1
+        assert root.locator('#calendar .event').count() == 4
         assert root.locator('#night button').count() == 0
         assert root.locator('#radar .radar-cover').evaluate('(e)=>getComputedStyle(e).pointerEvents') == 'none'
         assert root.locator('#climate').inner_text().find('22.5') >= 0
@@ -143,12 +158,12 @@ try:
             assert box['x'] >= 0 and box['x']+box['width'] <= 1024
             assert box['y']+box['height'] <= 768, box
         assert page.evaluate('window.calls.filter(c=>c.type === "call_service" && c.return_response).length') == 8
-        # All calendar entries remain reachable in the new compact tile.
-        for index in range(5):
+        # Four entries per page; the final entry remains reachable on page two.
+        for index in range(2):
             page.evaluate('(index)=>{window.dashboard._page=index;window.dashboard._render()}', index)
-            assert root.locator('#calendar .event').count() == 1
-            assert f'Seite {index+1}/5' in root.locator('#calendar').inner_text()
-            assert root.locator('#calendar .event>div').inner_text() == page.evaluate('(index)=>window.dashboard._data.events[index].summary', index)
+            expected=page.evaluate('(index)=>window.dashboard._data.events.slice(index*4,index*4+4).map(e=>e.summary)', index)
+            assert root.locator('#calendar .event>div').all_inner_texts() == expected
+            assert f'Seite {index+1}/2' in root.locator('#calendar').inner_text()
         page.evaluate('window.dashboard._page=0;window.dashboard._render()')
         # Energy values come from the configured daily sensors, including zero,
         # credits, unavailable states and alternate local mappings/currencies.

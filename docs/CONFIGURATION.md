@@ -91,7 +91,7 @@ Der Preisverlauf wird mit `tibber.get_prices` getrennt vom aktuellen Preissensor
 
 ### Strom, BKW & Batterie
 
-Ab V2.3.0 tauschen Kalender und Energiekachel ihre Positionen. **Strom, BKW & Batterie** steht jetzt mittig unter dem Preisdiagramm; der kompakte Kalender steht darunter.
+Ab V2.3.0 tauschen Kalender und Energiekachel ihre Positionen. **Strom, BKW & Batterie** steht jetzt mittig unter dem Preisdiagramm; der Kalender steht darunter. Seit V2.4.1 ist die Stromkachel flacher und die Kalenderkachel entsprechend höher; sämtliche Stromwerte bleiben sichtbar.
 
 Die Energiekachel zeigt:
 
@@ -146,6 +146,6 @@ Diese Version ergänzt keine Wolkendatenquelle und keine zusätzlichen externen 
 
 ## Wetter und Kalender
 
-`weather.get_forecasts` wird getrennt für Stunden- und Tagesvorhersage verwendet. Nicht jede Integration unterstützt beide Arten. `calendar.get_events` fragt nur die lokal angegebenen Kalender ab. Anzeige: heute und morgen einschließlich ganztägiger Termine. Seit V2.3.0 zeigt die kompakte Kachel jeweils einen Termin; bei mehreren Einträgen wechselt sie alle 15 Sekunden zum nächsten und zeigt die Seitennummer. Lange Titel werden gekürzt; der vollständige Text steht zusätzlich im Titelattribut. Tagesgrenzen folgen der HA-Zeitzone.
+`weather.get_forecasts` wird getrennt für Stunden- und Tagesvorhersage verwendet. Nicht jede Integration unterstützt beide Arten. `calendar.get_events` fragt nur die lokal angegebenen Kalender ab. Anzeige: heute und morgen einschließlich ganztägiger Termine. Seit V2.4.1 ist die Kalenderkachel höher und zeigt bis zu vier Termine gleichzeitig. Tag/Uhrzeit und Titel stehen kompakt nebeneinander. Bei mehr als vier Einträgen wechselt sie alle 15 Sekunden zur nächsten Seite und zeigt die Seitennummer. Lange Titel werden gekürzt; der vollständige Text steht zusätzlich im Titelattribut. Tagesgrenzen folgen der HA-Zeitzone.
 
 Termintitel können persönliche Angaben enthalten und sind auf dem Display sichtbar. Die Karte schreibt sie weder in GitHub noch in eine mitgelieferte Konfigurationsdatei.
