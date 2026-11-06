@@ -1,8 +1,17 @@
-# Home Dashboard iPad · V2.2.0
+# Home Dashboard iPad · V2.3.0
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.3.0
+
+- Kalender und Energiekachel tauschen ihre Positionen: **Strom, BKW & Batterie** steht jetzt mittig unter dem Preisdiagramm.
+- Neu: Tagesverbrauch in kWh und Stromkosten für heute, über zwei lokale Sensorzuordnungen. BKW-Leistung, Tagesertrag und Speicher-SOC bleiben sichtbar.
+- Kompakter Kalender darunter mit einem Termin pro Seite und automatischem Wechsel alle 15 Sekunden.
+- [Konfiguration der neuen Werte](docs/CONFIGURATION.md#strom-bkw--batterie) und aktualisiertes Beispielbild oben; ausschließlich synthetische Testdaten.
+
+Weitere Details: [Releasehinweise V2.3.0](docs/releases/v2.3.0.md).
 
 ## Neu in V2.2.0
 
@@ -33,7 +42,7 @@ Weitere Details: [Releasehinweise V2.1.1](docs/releases/v2.1.1.md).
 - Raumtemperatur, Luftfeuchte, CO₂ und optional Niederschlagsmenge; Temperatur-Min/Max aus der HA-Historie.
 - Tibber-Preisverlauf für heute und automatisch auch morgen, sobald Preise vorhanden sind. Antippen öffnet die Großansicht mit verschiebbarem Cursor, Zeitintervall und Preis in ct/kWh.
 - Weather Radar Card mit DWD, 60 Minuten Vergangenheit, 60 Minuten Vorhersage und Zoomstufe 8.
-- Stunden- und Tageswetter, Fahrzeugstatus, PV-Leistung, Tagesertrag und Speicher-SOC.
+- Stunden- und Tageswetter, Fahrzeugstatus, Strom-Tagesverbrauch und Tageskosten, PV-Leistung, Tagesertrag und Speicher-SOC.
 - Gemeinsame Kalenderliste für heute und morgen, automatischer Seitenwechsel.
 - Optionaler Aufruf eines selbst konfigurierten Gute-Nacht-Skripts; Bedienung standardmäßig gesperrt.
 

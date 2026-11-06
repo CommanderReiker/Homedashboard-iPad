@@ -62,6 +62,8 @@ views:
       current_price: sensor.demo_current_price
       pv_power: sensor.demo_pv_power
       pv_energy_today: sensor.demo_pv_energy_today
+      electricity_consumption_today: sensor.demo_electricity_consumption_today
+      electricity_cost_today: sensor.demo_electricity_cost_today
       vehicle_range: sensor.demo_vehicle_range
       vehicle_soc: sensor.demo_vehicle_soc
       vehicle_plug: binary_sensor.demo_vehicle_plug

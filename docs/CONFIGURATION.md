@@ -55,6 +55,8 @@ entities:
   current_price: sensor.demo_current_price
   pv_power: sensor.demo_pv_power
   pv_energy_today: sensor.demo_pv_energy_today
+  electricity_consumption_today: sensor.demo_electricity_consumption_today
+  electricity_cost_today: sensor.demo_electricity_cost_today
   vehicle_range: sensor.demo_vehicle_range
   vehicle_soc: sensor.demo_vehicle_soc
   vehicle_plug: binary_sensor.demo_vehicle_plug
@@ -63,9 +65,29 @@ entities:
   vehicle_charged_today: sensor.demo_vehicle_charged_today
 ```
 
-Erwartete Einheiten: aktueller Strompreis ct/kWh, PV-Leistung W, PV-Tagesertrag kWh, Fahrzeugreichweite km, Ladezustände %, heute geladene Energie kWh. Die beiden Fahrzeug-Statussensoren verwenden `on`/`off`. Nicht vorhandene Zuordnungen können entfallen oder `null` sein.
+Erwartete Einheiten: aktueller Strompreis ct/kWh, PV-Leistung W, PV-Tagesertrag kWh, Strom-Tagesverbrauch kWh, Stromkosten als Geldbetrag für heute, Fahrzeugreichweite km, Ladezustände %, heute geladene Energie kWh. Die beiden Fahrzeug-Statussensoren verwenden `on`/`off`. Nicht vorhandene Zuordnungen können entfallen oder `null` sein.
 
 Der Preisverlauf wird mit `tibber.get_prices` getrennt vom aktuellen Preissensor abgefragt. Der Abruf ist aktiviert, wenn `entities.current_price` oder `tibber_home` konfiguriert ist. Bei mehreren Tibber-Häusern `tibber_home` setzen, damit keine falsche Auswahl erfolgt. Preise und Termine werden alle fünf Minuten, Wetter alle 30 Minuten und Temperatur-Min/Max alle 15 Minuten angefragt, solange die Seite aktiv ist.
+
+### Strom, BKW & Batterie
+
+Ab V2.3.0 tauschen Kalender und Energiekachel ihre Positionen. **Strom, BKW & Batterie** steht jetzt mittig unter dem Preisdiagramm; der kompakte Kalender steht darunter.
+
+Die Energiekachel zeigt:
+
+| Wert | Lokale Zuordnung | Erwarteter Sensorwert |
+| --- | --- | --- |
+| Verbrauch heute | `entities.electricity_consumption_today` | Numerische Tagessumme in kWh |
+| Stromkosten heute | `entities.electricity_cost_today` | Numerische Kostensumme für heute in der Geldeinheit des Sensors |
+| BKW-Leistung | `entities.pv_power` | Aktuelle Leistung in W |
+| Ertrag heute | `entities.pv_energy_today` | Tagesertrag in kWh |
+| Speicher-SOC | `battery_soc` | Ladezustand in Prozent; weiterhin auf Kartenebene |
+
+Die beiden neuen Zuordnungen im **bestehenden** `entities:`-Block deiner lokalen Karte ergänzen. Die Beispiel-IDs durch eigene Tageszähler ersetzen; die vorhandenen Zuordnungen stehen lassen. Der [vollständige YAML-Vorschlag](../dashboard/dashboard.example.yaml) enthält nur synthetische Platzhalter.
+
+Verbrauch und Kosten werden direkt aus den Sensorzuständen übernommen und mit zwei Nachkommastellen angezeigt. Die Tagesabgrenzung und das Zurücksetzen übernimmt der jeweilige HA-Sensor. Es gibt keine eigene Summierung und keine Berechnung „Tagesverbrauch × aktueller Strompreis“; insbesondere bei variablen Tarifen muss der Kostensensor die zeitabhängigen Preise bereits berücksichtigen.
+
+Für die Kosten wird `unit_of_measurement` des Sensors angezeigt, ersatzweise die HA-Währung und schließlich `€`. Die Karte rechnet weder Wh in kWh noch Cent in Euro um. Fehlende Zuordnungen und Zustände wie `unknown` oder `unavailable` erscheinen als `—`; echte Nullwerte bleiben sichtbar. Änderungen werden mit den HA-Zuständen übernommen. Die neuen Werte lösen keine zusätzlichen Service- oder Historienabfragen aus.
 
 ### Strompreise vergrößern und auswählen
 
@@ -104,6 +126,6 @@ Diese Version ergänzt keine Wolkendatenquelle und keine zusätzlichen externen 
 
 ## Wetter und Kalender
 
-`weather.get_forecasts` wird getrennt für Stunden- und Tagesvorhersage verwendet. Nicht jede Integration unterstützt beide Arten. `calendar.get_events` fragt nur die lokal angegebenen Kalender ab. Anzeige: heute und morgen einschließlich ganztägiger Termine, vier Einträge je automatisch wechselnder Seite. Tagesgrenzen folgen der HA-Zeitzone.
+`weather.get_forecasts` wird getrennt für Stunden- und Tagesvorhersage verwendet. Nicht jede Integration unterstützt beide Arten. `calendar.get_events` fragt nur die lokal angegebenen Kalender ab. Anzeige: heute und morgen einschließlich ganztägiger Termine. Seit V2.3.0 zeigt die kompakte Kachel jeweils einen Termin; bei mehreren Einträgen wechselt sie alle 15 Sekunden zum nächsten und zeigt die Seitennummer. Lange Titel werden gekürzt; der vollständige Text steht zusätzlich im Titelattribut. Tagesgrenzen folgen der HA-Zeitzone.
 
 Termintitel können persönliche Angaben enthalten und sind auf dem Display sichtbar. Die Karte schreibt sie weder in GitHub noch in eine mitgelieferte Konfigurationsdatei.

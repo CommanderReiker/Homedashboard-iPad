@@ -24,19 +24,27 @@ try:
         assert radar_config == {'type':'custom:weather-radar-card', 'height':'100%', 'data_source':'DWD', 'past_minutes':60, 'forecast_minutes':60, 'forecast_refresh_minutes':15, 'zoom_level':8}
         assert root.locator('#price').inner_text().find('heute + morgen') >= 0
         assert root.locator('#climate .room').count() == 8
-        assert 'BKW & Batteriespeicher' in root.locator('#pv h2').inner_text()
+        assert 'Strom, BKW & Batterie' in root.locator('#pv h2').inner_text()
         assert '73%' in root.locator('#pv .battery').inner_text()
+        assert '8,42' in root.locator('#pv .consumption').inner_text()
+        assert '2,34' in root.locator('#pv .cost').inner_text()
+        assert '€' in root.locator('#pv .cost').inner_text()
         # Check the actual content, not only outer tiles, with HA chrome and decimals.
         page.evaluate('window.dashboard._data.daily.forEach(f=>{f.temperature=14.7;f.templow=6.7}); window.dashboard._data.hourly.forEach(f=>f.temperature=9.8); window.dashboard._render()')
         for width, height in [(1024, 768), (960, 700), (1280, 800)]:
             page.set_viewport_size({'width': width, 'height': height})
-            for selector, parent in [('#climate .room', '#climate'), ('#weather .days>div', '#weather'), ('#weather .hours>div', '#weather'), ('#pv .energy-values', '#pv'), ('#car>*', '#car')]:
+            for selector, parent in [('#climate .room', '#climate'), ('#weather .days>div', '#weather'), ('#weather .hours>div', '#weather'), ('#pv .energy-values', '#pv'), ('#calendar>*', '#calendar'), ('#car>*', '#car')]:
                 boundary = root.locator(parent).bounding_box()
                 for element in root.locator(selector).all():
                     box = element.bounding_box()
                     assert box['y'] >= boundary['y'] and box['y'] + box['height'] <= boundary['y'] + boundary['height'] - 8, (width, height, selector, box, boundary)
+            energy_box = root.locator('#pv').bounding_box()
+            calendar_box = root.locator('#calendar').bounding_box()
+            price_box = root.locator('#price').bounding_box()
+            assert energy_box['y'] > price_box['y'] and calendar_box['y'] > energy_box['y'] + energy_box['height']
+            assert abs(energy_box['x'] - calendar_box['x']) < 1
             # Last room's min/max and each forecast's text must fit inside their rows.
-            for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div']:
+            for selector in ['#climate .room>div', '#weather .days>div', '#weather .hours>div', '#pv .energy-values>div']:
                 for element in root.locator(selector).all():
                     assert element.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1 && e.scrollWidth<=e.clientWidth+1'), (width, height, selector)
         for value, expected in [('0', 'red'), ('19.9', 'red'), ('20', 'yellow'), ('69.9', 'yellow'), ('70', 'green'), ('100', 'green'), ('unavailable', None)]:
@@ -105,7 +113,7 @@ try:
         assert slider.is_disabled()
         dialog.locator('.price-close').click()
         page.evaluate('window.dashboard._data.prices=window.savedPrices;window.dashboard._data.prices[96].price=window.originalPrice;window.dashboard._render()')
-        assert root.locator('#calendar .event').count() == 4
+        assert root.locator('#calendar .event').count() == 1
         assert root.locator('#night button').count() == 0
         assert root.locator('#radar .radar-cover').evaluate('(e)=>getComputedStyle(e).pointerEvents') == 'none'
         assert root.locator('#climate').inner_text().find('22.5') >= 0
@@ -115,6 +123,24 @@ try:
             assert box['x'] >= 0 and box['x']+box['width'] <= 1024
             assert box['y']+box['height'] <= 768, box
         assert page.evaluate('window.calls.filter(c=>c.type === "call_service" && c.return_response).length') == 8
+        # All calendar entries remain reachable in the new compact tile.
+        for index in range(5):
+            page.evaluate('(index)=>{window.dashboard._page=index;window.dashboard._render()}', index)
+            assert root.locator('#calendar .event').count() == 1
+            assert f'Seite {index+1}/5' in root.locator('#calendar').inner_text()
+            assert root.locator('#calendar .event>div').inner_text() == page.evaluate('(index)=>window.dashboard._data.events[index].summary', index)
+        page.evaluate('window.dashboard._page=0;window.dashboard._render()')
+        # Energy values come from the configured daily sensors, including zero,
+        # credits, unavailable states and alternate local mappings/currencies.
+        for value, expected in [('0','0,00'), ('-1.25','-1,25'), ('unavailable','—'), ('unknown','—')]:
+            page.evaluate('(value)=>{window.mockHass.states["sensor.demo_electricity_cost_today"].state=value;window.mockHass.states["sensor.demo_electricity_consumption_today"].state=value;window.dashboard.hass=window.mockHass}', value)
+            assert expected in root.locator('#pv .cost').inner_text()
+            assert expected in root.locator('#pv .consumption').inner_text()
+        page.evaluate('window.dashboard._config.entities.electricity_cost_today="sensor.custom_cost";window.mockHass.states["sensor.custom_cost"]={state:"9.87",attributes:{unit_of_measurement:"CHF"}};window.dashboard.hass=window.mockHass')
+        assert '9,87' in root.locator('#pv .cost').inner_text() and 'CHF' in root.locator('#pv .cost').inner_text()
+        page.evaluate('window.mockHass.states["sensor.custom_cost"].attributes.unit_of_measurement="<img src=x onerror=alert(1)>";window.dashboard.hass=window.mockHass')
+        assert root.locator('#pv img').count() == 0
+        page.evaluate('window.mockHass.states["sensor.demo_electricity_cost_today"].state="2.34";window.mockHass.states["sensor.demo_electricity_consumption_today"].state="8.42"')
         # Vehicle name entity takes precedence, updates through hass, and stays plain text.
         assert root.locator('#car h2').inner_text() == '🚘 Demoauto'
         page.evaluate('window.dashboard.setConfig({...window.demoConfig,vehicle_name:"Fallback",vehicle_name_entity:"input_text.demo_vehicle_name"}); window.dashboard.hass=window.mockHass')
@@ -168,6 +194,8 @@ try:
         assert page.evaluate('window.calls.length') == before
         assert 'Räume im Dashboard-YAML konfigurieren' in root.locator('#climate').inner_text()
         assert root.locator('#night button').count() == 0
+        assert '—' in root.locator('#pv .consumption').inner_text()
+        assert '—' in root.locator('#pv .cost').inner_text()
         assert not errors, errors
         browser.close()
         print('PASS: interactive price detail (touch, drag, keyboard, negative prices, empty data, today-only), iPad layout, service responses, calendar escaping, today-only fallback, locked display, optional night action')
