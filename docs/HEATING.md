@@ -43,7 +43,7 @@ Ohne diese optionalen Zuordnungen reicht eine Climate-Entität pro Raum. Die Tem
 
 ## Historie und Aktualisierung
 
-- Blau: Isttemperatur. Gelb: Solltemperatur als Stufenkurve. Orange Flächen: gemeldete Heizphasen, keine geschätzte Wärmeanforderung.
+- Blau: Isttemperatur. Gelb: Solltemperatur als Stufenkurve. Rote Flächen mit 42 % Deckkraft: gemeldete Heizphasen, keine geschätzte Wärmeanforderung.
 - Ein gemeinsamer Abruf liest die letzten 24 Stunden für die konfigurierten Regler und optionalen Sensoren aus der HA-Historie. Die Climate-Attribute und ihre Änderungszeitpunkte bleiben dabei erhalten. Nachladen spätestens beim nächsten 15-Sekunden-Anzeigezyklus nach Ablauf von fünf Minuten.
 - Aktuelle Temperaturen, Heizstatus und Schalterstatus kommen direkt aus den HA-Zustandsaktualisierungen. Der Verlauf zeigt den Stand des letzten erfolgreichen Historienabrufs; dieser steht unter der Kachel. Die Uhrzeiten folgen der HA-Zeitzone.
 - Die beteiligten Entitäten müssen durch den HA-Recorder aufgezeichnet werden. Ohne gespeicherte Temperaturwerte erscheint **Keine Temperaturhistorie verfügbar**. Fehlende Live-Werte erscheinen als `—`; unbekannte Heizaktivität wird nicht als Heizpause ausgegeben.
