@@ -1,6 +1,6 @@
-import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries} from './data.js?v=2.4.2';
+import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries, heatingIntervals} from './data.js?v=2.4.3';
 
-const VERSION='2.4.2';
+const VERSION='2.4.3';
 const DEFAULT_ENTITIES={"current_price": null, "pv_power": null, "pv_energy_today": null, "electricity_consumption_today": null, "electricity_cost_today": null, "vehicle_range": null, "vehicle_soc": null, "vehicle_plug": null, "vehicle_charging": null, "vehicle_target_soc": null, "vehicle_charged_today": null};
 const WEATHER={sunny:['☀','Sonnig'],clear:['☀','Klar'],'clear-night':['☾','Klare Nacht'],cloudy:['☁','Bewölkt'],partlycloudy:['⛅','Teils bewölkt'],rainy:['🌧','Regen'],pouring:['🌧','Starkregen'],snowy:['❄','Schnee'],'snowy-rainy':['🌨','Schneeregen'],fog:['≋','Nebel'],windy:['≋','Windig'],'windy-variant':['≋','Windig'],lightning:['ϟ','Gewitter'],'lightning-rainy':['⛈','Gewitter'],hail:['🌨','Hagel'],exceptional:['⚠','Unwetter']};
 export class HomeDashboard extends HTMLElement {
@@ -173,7 +173,7 @@ export class HomeDashboard extends HTMLElement {
       if(previous)d+=` H${x(end)}`;
       return d;
     };
-    const bands=series.activity.map((p,i)=>p.value===1?`<rect x="${x(p.time)}" y="22" width="${Math.max(0,x(series.activity[i+1]?.time??end)-x(p.time))}" height="96" fill="#ff645d" opacity=".42"/>`:'').join('');
+    const bands=heatingIntervals(series.activity,end).map(interval=>`<rect x="${x(interval.start)}" y="22" width="${x(interval.end)-x(interval.start)}" height="96" fill="#ff645d" opacity=".42"/>`).join('');
     return `<svg class="heating-chart" viewBox="0 0 440 146" preserveAspectRatio="none" role="img" aria-label="${esc(name)}: Isttemperatur blau, Solltemperatur gelb und Heizphasen rot; letzte 24 Stunden"><g font-size="10" fill="#aeb6bd">${Array.from({length:4},(_,i)=>low+(high-low)*i/3).map(v=>`<path d="M36 ${y(v)} H430" stroke="#ffffff1c"/><text x="30" y="${y(v)+3}" text-anchor="end">${v.toLocaleString('de-DE',{maximumFractionDigits:1})}</text>`).join('')}${Array.from({length:5},(_,i)=>start+i*21600000).map((t,i)=>`<path d="M${x(t)} 22 V118" stroke="#ffffff12"/><text x="${x(t)}" y="138" text-anchor="${i===0?'start':i===4?'end':'middle'}">${this._time(new Date(t))}</text>`).join('')}<text x="6" y="12">${esc(this._hass.config?.unit_system?.temperature||'°C')}</text></g>${bands}<path class="actual-line" d="${line(series.actual,false)}" fill="none" stroke="#6593ff" stroke-width="2"/><path class="target-line" d="${line(series.target,true)}" fill="none" stroke="#f6c65b" stroke-width="2"/></svg>`;
   }
   _priceWindow(now=new Date()){

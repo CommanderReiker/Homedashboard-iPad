@@ -1,8 +1,16 @@
-# Home Dashboard iPad · V2.4.2
+# Home Dashboard iPad · V2.4.3
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.3
+
+- Zusammenhängende Heizphasen werden als homogene rote Flächen dargestellt, unabhängig von der Temperatur-Abtastrate.
+- Auch kurze gemeldete Heizpausen und unbekannte Zustände bleiben als echte Unterbrechungen erhalten; keine zeitliche Glättung.
+- Gilt für alle vier Heizungsregler; Beispielbilder und Dokumentation aktualisiert. Lokale YAML unverändert.
+
+Weitere Details: [Releasehinweise V2.4.3](docs/releases/v2.4.3.md).
 
 ## Neu in V2.4.2
 

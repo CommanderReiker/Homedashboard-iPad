@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {temperatureValue, heatingActivity, heatingSeries, historySeries} from '../www/home-dashboard/data.js';
+import {temperatureValue, heatingActivity, heatingSeries, historySeries, heatingIntervals} from '../www/home-dashboard/data.js';
 const start=Date.parse('2026-11-06T00:00:00Z'),end=start+86400000;
 const row=(hours,state,attributes={})=>({entity_id:'climate.demo',state,attributes,last_changed:new Date(start-3600000).toISOString(),last_updated:new Date(start+hours*3600000).toISOString()});
 test('Climate history uses attribute timestamps and retains unavailable gaps',()=>{
@@ -27,4 +27,25 @@ test('Unavailable values are never zero degrees and unknown activity is distinct
   assert.equal(heatingActivity({state:'heat',attributes:{hvac_action:'heating'}},'hvac_action'),1);
   assert.equal(heatingActivity({state:'heat',attributes:{hvac_action:'idle'}},'hvac_action'),0);
   assert.equal(heatingActivity({state:'heat'},'hvac_action'),null);
+});
+
+test('High-frequency temperature updates produce one uninterrupted heating interval',()=>{
+  const records=Array.from({length:3600},(_,i)=>({...row(0,'heat',{current_temperature:20+i/10000,hvac_action:'heating'}),last_updated:new Date(start+i*1000).toISOString()}));
+  const series=heatingSeries([records],{entity:'climate.demo'},start,end);
+  assert.equal(series.activity.length,3600);
+  assert.deepEqual(heatingIntervals(series.activity,end),[{start,end}]);
+});
+test('A one-second idle or unknown state remains an exact gap at any sampling rate',()=>{
+  const points=[{time:start,value:1},{time:start+1000,value:1},{time:start+2000,value:0},{time:start+3000,value:1},{time:start+4000,value:null},{time:start+5000,value:1}];
+  assert.deepEqual(heatingIntervals(points,end),[
+    {start,end:start+2000},
+    {start:start+3000,end:start+4000},
+    {start:start+5000,end}
+  ]);
+});
+test('Leading idle, trailing unknown, empty history and zero-length intervals are not painted',()=>{
+  assert.deepEqual(heatingIntervals([],end),[]);
+  assert.deepEqual(heatingIntervals([{time:start,value:0},{time:start+1000,value:null}],end),[]);
+  assert.deepEqual(heatingIntervals([{time:start,value:0},{time:start+1000,value:1},{time:start+2000,value:null}],end),[{start:start+1000,end:start+2000}]);
+  assert.deepEqual(heatingIntervals([{time:end,value:1}],end),[]);
 });

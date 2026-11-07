@@ -28,6 +28,25 @@ try:
         path = page.evaluate('window.calls[0].path')
         assert 'significant_changes_only=0' in path and 'no_attributes' not in path and 'minimal_response' not in path
         assert 'climate.demo_heating_1' in path and 'climate.demo_heating_4' in path
+        # Dense, unchanged heating reports produce one solid SVG band per room.
+        # Every real one-minute pause and unknown state still splits that band.
+        page.evaluate("""()=>{
+            window.savedHeatingHistory=window.dashboard._heatingHistory;
+            const {start,end}=window.savedHeatingHistory;
+            const rows=window.heatingConfig.heating.thermostats.map(room=>Array.from({length:60},(_,i)=>({entity_id:room.entity,state:'heat',last_updated:new Date(start+i*60000).toISOString(),attributes:{current_temperature:20+i/100,temperature:22,hvac_action:'heating'}})));
+            window.dashboard._heatingHistory={start,end,rows};window.dashboard._render();
+        }""")
+        for chart in root.locator('.heating-chart').all():
+            assert chart.locator('rect').count() == 1
+        page.evaluate('window.dashboard._heatingHistory.rows.forEach(rows=>rows[30].attributes.hvac_action="idle");window.dashboard._render()')
+        for chart in root.locator('.heating-chart').all():
+            assert chart.locator('rect').count() == 2
+            bands=chart.locator('rect').evaluate_all('(els)=>els.map(e=>({x:+e.getAttribute("x"),width:+e.getAttribute("width")}))')
+            assert abs(bands[1]['x']-(bands[0]['x']+bands[0]['width'])-394/1440)<1e-8
+        page.evaluate('window.dashboard._heatingHistory.rows.forEach(rows=>rows[40].state="unavailable");window.dashboard._render()')
+        for chart in root.locator('.heating-chart').all():
+            assert chart.locator('rect').count() == 3
+        page.evaluate('window.dashboard._heatingHistory=window.savedHeatingHistory;window.dashboard._render()')
         # Four flat cards fit on the iPad; mobile stacks without horizontal overflow.
         for width, height in [(1024,768),(960,700),(1280,800),(600,900),(390,844)]:
             page.set_viewport_size({'width':width,'height':height})

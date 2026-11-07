@@ -43,6 +43,7 @@ Ohne diese optionalen Zuordnungen reicht eine Climate-Entität pro Raum. Die Tem
 
 ## Historie und Aktualisierung
 
+- Ab V2.4.3 werden aufeinanderfolgende unveränderte „Heizt“-Meldungen als eine durchgehende Fläche gezeichnet. Eine höhere Temperatur-Abtastrate erzeugt dadurch keine künstlichen Trennlinien. Jede gemeldete Heizpause (`idle`/`off`) oder ein unbekannter Zustand unterbricht die Fläche am tatsächlichen Zeitstempel, ohne Mindestdauer oder zeitliche Glättung. Sehr kurze Pausen können im 24-Stunden-Diagramm weiterhin schmaler als ein Bildschirmpixel sein; die Zeitintervalle werden nicht gerundet oder überbrückt. Nicht gemeldete Zustandswechsel lassen sich aus der Historie nicht rekonstruieren.
 - Blau: Isttemperatur. Gelb: Solltemperatur als Stufenkurve. Rote Flächen mit 42 % Deckkraft: gemeldete Heizphasen, keine geschätzte Wärmeanforderung.
 - Ein gemeinsamer Abruf liest die letzten 24 Stunden für die konfigurierten Regler und optionalen Sensoren aus der HA-Historie. Die Climate-Attribute und ihre Änderungszeitpunkte bleiben dabei erhalten. Nachladen spätestens beim nächsten 15-Sekunden-Anzeigezyklus nach Ablauf von fünf Minuten.
 - Aktuelle Temperaturen, Heizstatus und Schalterstatus kommen direkt aus den HA-Zustandsaktualisierungen. Der Verlauf zeigt den Stand des letzten erfolgreichen Historienabrufs; dieser steht unter der Kachel. Die Uhrzeiten folgen der HA-Zeitzone.

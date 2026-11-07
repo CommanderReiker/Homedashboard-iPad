@@ -88,3 +88,19 @@ export function heatingSeries(histories, room, start, end) {
     activity:historySeries(byId.get(room.heating_entity || room.entity),r=>heatingActivity(r,room.heating_entity?null:'hvac_action'),start,end)
   };
 }
+
+// Join only consecutive active samples. Even the shortest reported pause or
+// unknown state closes the interval; there is no debounce or time smoothing.
+export function heatingIntervals(points, end) {
+  const intervals=[];let start=null;
+  for (const point of points) {
+    if (point.value===1) {
+      if (start===null) start=point.time;
+    } else if (start!==null) {
+      if (point.time>start) intervals.push({start,end:point.time});
+      start=null;
+    }
+  }
+  if (start!==null && end>start) intervals.push({start,end});
+  return intervals;
+}
