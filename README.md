@@ -1,8 +1,16 @@
-# Home Dashboard iPad · V2.4.3
+# Home Dashboard iPad · V2.4.4
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.4
+
+- Sichtbare Überschrift „Raumklima“ entfernt; der frei gewordene Platz reicht für neun Temperaturzeilen plus PM2.5.
+- Zusätzliche Temperatur direkt über PM2.5 über den bestehenden lokalen `rooms`-Block eintragen; Außensensor bleibt der letzte Eintrag.
+- [YAML-Erweiterung](docs/CONFIGURATION.md#zusätzliche-temperatur-über-pm25) dokumentiert und Beispielbild oben erneuert.
+
+Weitere Details: [Releasehinweise V2.4.4](docs/releases/v2.4.4.md).
 
 ## Neu in V2.4.3
 

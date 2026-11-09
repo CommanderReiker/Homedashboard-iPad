@@ -23,13 +23,18 @@ try:
         radar_config = page.evaluate('window.dashboard._radar.config')
         assert radar_config == {'type':'custom:weather-radar-card', 'height':'100%', 'data_source':'DWD', 'past_minutes':60, 'forecast_minutes':60, 'forecast_refresh_minutes':15, 'zoom_level':8}
         assert root.locator('#price').inner_text().find('heute + morgen') >= 0
-        assert root.locator('#climate .room').count() == 9
+        assert root.locator('#climate .room').count() == 10
+        assert root.locator('#climate h2').count() == 0
+        assert root.locator('#climate .room').nth(7).locator('strong').inner_text() == 'Zusatz'
+        assert root.locator('#climate .room').nth(7).locator('b').inner_text() == '21,4°'
+        assert root.locator('#climate .room').nth(7).locator('small').first.inner_text() == '↑22.5° ↓20.1°'
+        assert root.locator('#climate .room').nth(7).locator('.cyan').inner_text() == '—'
         assert 'Strom, BKW & Batterie' in root.locator('#pv h2').inner_text()
         assert '73%' in root.locator('#pv .battery').inner_text()
         assert '8,42' in root.locator('#pv .consumption').inner_text()
         assert '2,34' in root.locator('#pv .cost').inner_text()
         assert '€' in root.locator('#pv .cost').inner_text()
-        assert root.locator('#climate .room').nth(7).get_attribute('class') == 'room pm25'
+        assert root.locator('#climate .room').nth(8).get_attribute('class') == 'room pm25'
         assert root.locator('#climate .room').last.locator('strong').inner_text() == 'Außen'
         assert root.locator('.pm25-current').inner_text() == '6,4'
         assert root.locator('.pm25-range b').all_inner_texts() == ['2,1','14,8']
@@ -70,7 +75,7 @@ try:
         # The left-column wrapper returns to the existing narrow layout.
         for width in [760,600]:
             page.set_viewport_size({'width':width,'height':1024})
-            assert root.locator('#climate .room').count() == 9
+            assert root.locator('#climate .room').count() == 10
             assert root.locator('.left-column').evaluate('(e)=>getComputedStyle(e).display') == 'contents'
             for el in root.locator('#climate .room').all():
                 b=el.bounding_box()
@@ -247,7 +252,7 @@ try:
         page.evaluate('window.dashboard.setConfig({...window.demoConfig,pm25:null});window.dashboard.hass=window.mockHass')
         page.wait_for_function('!window.dashboard._busy')
         assert root.locator('.pm25').count() == 0
-        assert root.locator('#climate .room').count() == 8
+        assert root.locator('#climate .room').count() == 9
         assert page.evaluate('!window.historyCalls.at(-1).path.includes("sensor.demo_pm25")')
         page.evaluate('window.dashboard.setConfig({pm25:"sensor.demo_pm25"});window.dashboard.hass=window.mockHass')
         page.wait_for_function('!window.dashboard._busy')

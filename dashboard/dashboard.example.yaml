@@ -38,6 +38,11 @@ views:
       - sensor.demo_room_7_temperature
       - sensor.demo_room_7_humidity
       - sensor.demo_room_7_co2
+    # Optional: zusätzliche Temperatur direkt vor dem Außensensor
+    - - Zusatz
+      - sensor.demo_extra_temperature
+      - null
+      - null
     - - Außen
       - sensor.demo_room_8_temperature
       - sensor.demo_room_8_humidity

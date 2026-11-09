@@ -1,6 +1,6 @@
-import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries, heatingIntervals} from './data.js?v=2.4.3';
+import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries, heatingIntervals} from './data.js?v=2.4.4';
 
-const VERSION='2.4.3';
+const VERSION='2.4.4';
 const DEFAULT_ENTITIES={"current_price": null, "pv_power": null, "pv_energy_today": null, "electricity_consumption_today": null, "electricity_cost_today": null, "vehicle_range": null, "vehicle_soc": null, "vehicle_plug": null, "vehicle_charging": null, "vehicle_target_soc": null, "vehicle_charged_today": null};
 const WEATHER={sunny:['☀','Sonnig'],clear:['☀','Klar'],'clear-night':['☾','Klare Nacht'],cloudy:['☁','Bewölkt'],partlycloudy:['⛅','Teils bewölkt'],rainy:['🌧','Regen'],pouring:['🌧','Starkregen'],snowy:['❄','Schnee'],'snowy-rainy':['🌨','Schneeregen'],fog:['≋','Nebel'],windy:['≋','Windig'],'windy-variant':['≋','Windig'],lightning:['ϟ','Gewitter'],'lightning-rainy':['⛈','Gewitter'],hail:['🌨','Hagel'],exceptional:['⚠','Unwetter']};
 export class HomeDashboard extends HTMLElement {
@@ -84,7 +84,7 @@ export class HomeDashboard extends HTMLElement {
     root.querySelector('.clock').textContent=`${this._time(now)} · ${new Intl.DateTimeFormat('de-DE',{timeZone:zone,weekday:'long',day:'numeric',month:'long'}).format(now)}`;
     const climateRows=c.rooms.map(room=>({room}));
     if(c.pm25)climateRows.splice(Math.max(0,climateRows.length-1),0,{pm25:true});
-    put('climate',`<h2>Raumklima</h2><div class="rooms" style="--room-count:${Math.max(1,climateRows.length)}">${!climateRows.length?'<p>Räume im Dashboard-YAML konfigurieren</p>':''}${climateRows.map(item=>{
+    put('climate',`<div class="rooms" role="group" aria-label="Temperaturen und Luftqualität" style="--room-count:${Math.max(1,climateRows.length)}">${!climateRows.length?'<p>Räume im Dashboard-YAML konfigurieren</p>':''}${climateRows.map(item=>{
       if(item.pm25){
         const e=this._errors.extrema?null:this._data.extrema?.[c.pm25],fmt=n=>n.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
         const unit=esc(h.states[c.pm25]?.attributes?.unit_of_measurement||'µg/m³');

@@ -33,9 +33,24 @@ rooms:
   - [Außen, sensor.demo_outside_temperature, sensor.demo_outside_humidity, null, sensor.demo_rain_today]
 ```
 
-Die IDs sind Platzhalter und müssen lokal durch eigene ersetzt werden. Bei fehlendem CO₂-Sensor `null` verwenden. Die optionale fünfte ID zeigt Niederschlag statt CO₂. Bis zu acht Temperaturzeilen plus einer optionalen PM2.5-Zeile sind im iPad-Layout geprüft; viele weitere Zeilen oder vergrößerte Systemschrift können mehr Platz benötigen. Die Historie wird nur für die angegebenen Temperatursensoren und den optionalen PM2.5-Sensor abgefragt.
+Die IDs sind Platzhalter und müssen lokal durch eigene ersetzt werden. Bei fehlendem CO₂-Sensor `null` verwenden. Die optionale fünfte ID zeigt Niederschlag statt CO₂. Bis zu neun Temperaturzeilen plus einer optionalen PM2.5-Zeile sind im iPad-Layout geprüft; viele weitere Zeilen oder vergrößerte Systemschrift können mehr Platz benötigen. Die Historie wird nur für die angegebenen Temperatursensoren und den optionalen PM2.5-Sensor abgefragt.
 
 Erwartete Einheiten: Temperatur °C, Feuchte %, CO₂ ppm. Niederschlag verwendet die Einheit des Sensors, ersatzweise mm. CO₂-Farben: unter 1000 ppm grün, ab 1000 ppm gelb, ab 2000 ppm rot. Fehlende oder nicht verfügbare Messwerte erscheinen als `—`.
+
+### Zusätzliche Temperatur über PM2.5
+
+Ab V2.4.4 entfällt die sichtbare Überschrift „Raumklima“. Der freie Platz ermöglicht eine neunte Temperaturzeile zusätzlich zur optionalen PM2.5-Zeile; die Schriftgröße bleibt erhalten.
+
+Im **bestehenden** lokalen `rooms:`-Block vor dem letzten Eintrag (Außensensor) eine weitere Zeile ergänzen:
+
+```yaml
+# Innerhalb der vorhandenen rooms-Liste, vor dem Außensensor:
+- [Zusatz, sensor.demo_extra_temperature, null, null]
+```
+
+Den Namen und die Sensor-ID durch eigene Werte ersetzen. Es ist kein neuer Konfigurationsschlüssel nötig. `null` steht für nicht konfigurierte Luftfeuchte- und CO₂-Sensoren; bei Bedarf dort ebenfalls eigene Sensoren eintragen. Die zusätzliche Temperatur zeigt wie die übrigen Zeilen Tages-Min/Max aus der HA-Historie.
+
+Die Reihenfolge am Ende der Anzeige lautet dann **Zusatztemperatur → PM2.5 → Außensensor**. PM2.5 wird weiterhin automatisch vor dem letzten `rooms`-Eintrag eingefügt. Ohne zusätzlichen YAML-Eintrag erscheint keine leere Platzhalterzeile. Ein vollständiges Beispiel mit neun Temperaturzeilen steht in [dashboard.example.yaml](../dashboard/dashboard.example.yaml).
 
 ### PM2.5 mit Tages-Minimum und -Maximum
 
