@@ -1,8 +1,14 @@
-# Home Dashboard iPad · V2.4.4
+# Home Dashboard iPad · V2.4.5
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.5
+
+- Autokachel: „Heute geladen: … kWh“ statt „Heute … kWh“ für die heute geladene Energie.
+
+Weitere Details: [Releasehinweise V2.4.5](docs/releases/v2.4.5.md).
 
 ## Neu in V2.4.4
 

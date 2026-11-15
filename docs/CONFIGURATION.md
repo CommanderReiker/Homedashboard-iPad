@@ -100,6 +100,8 @@ entities:
   vehicle_charged_today: sensor.demo_vehicle_charged_today
 ```
 
+Die Autokachel beschriftet `entities.vehicle_charged_today` ab V2.4.5 mit „Heute geladen: … kWh“. Sensorzuordnung, Wert und Nachkommastelle bleiben unverändert.
+
 Erwartete Einheiten: aktueller Strompreis ct/kWh, PV-Leistung W, PV-Tagesertrag kWh, Strom-Tagesverbrauch kWh, Stromkosten als Geldbetrag für heute, Fahrzeugreichweite km, Ladezustände %, heute geladene Energie kWh. Die beiden Fahrzeug-Statussensoren verwenden `on`/`off`. Nicht vorhandene Zuordnungen können entfallen oder `null` sein.
 
 Der Preisverlauf wird mit `tibber.get_prices` getrennt vom aktuellen Preissensor abgefragt. Der Abruf ist aktiviert, wenn `entities.current_price` oder `tibber_home` konfiguriert ist. Bei mehreren Tibber-Häusern `tibber_home` setzen, damit keine falsche Auswahl erfolgt. Preise und Termine werden alle fünf Minuten, Wetter alle 30 Minuten und Temperatur-Min/Max alle 15 Minuten angefragt, solange die Seite aktiv ist.
