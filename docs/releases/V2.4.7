@@ -1,0 +1,7 @@
+V2.4.7 – Einheitliche Temperaturskalierung
+
+* Einheitliche Y-Achsen aller vier Heizungsdiagramme von 18 bis 24 °C.
+* Horizontale Gitternetzlinien im Abstand von 1 °C.
+* Verbesserte Vergleichbarkeit der Temperaturverläufe.
+* Grafische Begrenzung der Temperaturkurven auf die Diagrammfläche.
+* Keine Änderungen an der Heizungsregelung oder der lokalen YAML-Konfiguration erforderlich.
