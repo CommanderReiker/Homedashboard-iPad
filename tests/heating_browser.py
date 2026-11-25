@@ -21,6 +21,16 @@ try:
         assert root.locator('.automation-item').count() == 4
         assert [s.inner_text() for s in root.locator('.automation-item small').all()] == ['Aktiv','Aus','Nicht verfügbar','Nicht verfügbar']
         assert root.locator('.thermostat').count() == 4
+        assert root.locator('.thermostat-status').all_inner_texts() == ['Thermostat aktiviert']*3+['Thermostat deaktiviert']
+        # HVAC mode controls enabled status independently of heating vs idle.
+        page.evaluate('window.savedFirstThermostat=structuredClone(window.mockHass.states["climate.demo_heating_1"])')
+        for mode, expected in [('heat','Thermostat aktiviert'),('auto','Thermostat aktiviert'),('heat_cool','Thermostat aktiviert'),('cool','Thermostat aktiviert'),('dry','Thermostat aktiviert'),('fan_only','Thermostat aktiviert'),('off','Thermostat deaktiviert'),('unknown','Thermostatstatus unbekannt'),('unavailable','Thermostatstatus unbekannt'),('unexpected','Thermostatstatus unbekannt')]:
+            page.evaluate('(mode)=>{window.mockHass.states["climate.demo_heating_1"].state=mode;window.mockHass.states["climate.demo_heating_1"].attributes.hvac_action="idle";window.dashboard.hass=window.mockHass}', mode)
+            assert root.locator('.thermostat-status').first.inner_text()==expected
+            if mode in ['heat','auto','off']:
+                assert root.locator('.heat-action').first.inner_text()=='Heizpause'
+        page.evaluate('window.mockHass.states["climate.demo_heating_1"]=window.savedFirstThermostat;window.dashboard.hass=window.mockHass')
+
         assert root.locator('.actual-line').count() == 4
         assert root.locator('.target-line').count() == 4
         assert root.locator('.heating-chart rect').count() > 0
@@ -50,7 +60,7 @@ try:
         # Four flat cards fit on the iPad; mobile stacks without horizontal overflow.
         for width, height in [(1024,768),(960,700),(1280,800),(600,900),(390,844)]:
             page.set_viewport_size({'width':width,'height':height})
-            for selector in ['.automation-item','.thermostat','.heating-chart','.heating-legend','.history-note']:
+            for selector in ['.automation-item','.thermostat','.thermostat>.heading','.thermostat-status','.heating-chart','.heating-legend','.history-note']:
                 for el in root.locator(selector).all():
                     b = el.bounding_box()
                     assert b['x'] >= 0 and b['x']+b['width'] <= width+1, (width,selector,b)
@@ -77,6 +87,7 @@ try:
         assert root.locator('img').count() == 0
         assert root.locator('.automation-item small').first.inner_text() == 'Nicht verfügbar'
         assert '—' in root.locator('.thermostat .actual').first.inner_text()
+        assert root.locator('.thermostat-status').first.inner_text()=='Thermostatstatus unbekannt'
         assert root.locator('.thermostat.empty').count() == 3
         before = page.evaluate('window.calls.length')
         page.evaluate('window.dashboard.setConfig({view:"heating"})')

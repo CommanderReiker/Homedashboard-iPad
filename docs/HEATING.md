@@ -41,6 +41,16 @@ Beispiel für separate Sensoren, direkt als Eintrag unter `thermostats:`:
 
 Ohne diese optionalen Zuordnungen reicht eine Climate-Entität pro Raum. Die Temperaturwerte müssen in der Temperatureinheit der HA-Installation vorliegen. Regler mit ausschließlich einem Solltemperaturbereich (`target_temp_low`/`target_temp_high`) benötigen einen separaten Sollwertsensor; die Karte erfindet daraus keinen einzelnen Sollwert.
 
+## Thermostat aktiviert oder deaktiviert
+
+Ab V2.4.6 steht der generelle Thermostatstatus oben zwischen Raumname und Heizaktivität in allen vier Reglerkacheln. Er wird automatisch aus dem **Zustand der konfigurierten Climate-Entität** (`heating.thermostats[].entity`) gelesen; eine weitere YAML-Zuordnung ist nicht nötig.
+
+- `off`: **Thermostat deaktiviert**.
+- `heat`, `auto`, `heat_cool`, `cool`, `dry` oder `fan_only`: **Thermostat aktiviert** – ein Betriebsmodus ist eingeschaltet.
+- Fehlende Entität, `unknown`, `unavailable` oder ein nicht erkannter Modus: **Thermostatstatus unbekannt**.
+
+Die danebenstehende Anzeige **Heizt / Heizpause** beschreibt weiterhin die aktuelle Heizaktivität aus `hvac_action` beziehungsweise dem optionalen `heating_entity`. Ein aktiviertes Thermostat kann gerade pausieren, weil die Solltemperatur erreicht ist. Der Thermostatstatus ist außerdem unabhängig von den vier Automatikschaltern über den Diagrammen. Wird die Ansicht ausschließlich aus separaten Sensoren gespeist, ohne eine Climate-Entität zuzuordnen, bleibt der generelle Thermostatstatus unbekannt.
+
 ## Historie und Aktualisierung
 
 - Ab V2.4.3 werden aufeinanderfolgende unveränderte „Heizt“-Meldungen als eine durchgehende Fläche gezeichnet. Eine höhere Temperatur-Abtastrate erzeugt dadurch keine künstlichen Trennlinien. Jede gemeldete Heizpause (`idle`/`off`) oder ein unbekannter Zustand unterbricht die Fläche am tatsächlichen Zeitstempel, ohne Mindestdauer oder zeitliche Glättung. Sehr kurze Pausen können im 24-Stunden-Diagramm weiterhin schmaler als ein Bildschirmpixel sein; die Zeitintervalle werden nicht gerundet oder überbrückt. Nicht gemeldete Zustandswechsel lassen sich aus der Historie nicht rekonstruieren.

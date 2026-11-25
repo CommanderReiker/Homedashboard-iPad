@@ -1,8 +1,16 @@
-# Home Dashboard iPad · V2.4.5
+# Home Dashboard iPad · V2.4.6
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.6
+
+- Heizungsansicht: „Thermostat aktiviert“ oder „Thermostat deaktiviert“ direkt rechts neben dem Raumnamen, getrennt von „Heizt / Heizpause“.
+- Status automatisch aus der lokal konfigurierten Climate-Entität; unbekannte Zustände bleiben ausdrücklich unbekannt. Keine YAML-Änderung nötig.
+- [Thermostatstatus erklärt](docs/HEATING.md#thermostat-aktiviert-oder-deaktiviert); Heizungs-Beispielbild aktualisiert.
+
+Weitere Details: [Releasehinweise V2.4.6](docs/releases/v2.4.6.md).
 
 ## Neu in V2.4.5
 
