@@ -2,6 +2,11 @@ name: Rebuild distribution
 
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Create version tag and trigger release'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -26,3 +31,22 @@ jobs:
             git commit -m "Rebuild distribution"
             git push
           fi
+
+      - name: Create version tag
+        if: inputs.publish
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Publish release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          gh release create "v$VERSION" \
+            dist/Homedashboard-iPad.js \
+            --verify-tag \
+            --title "Home Dashboard iPad v$VERSION" \
+            --notes-file "docs/releases/v$VERSION.md"
