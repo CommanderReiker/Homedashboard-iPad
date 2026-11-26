@@ -1,8 +1,17 @@
-# Home Dashboard iPad · V2.4.6
+# Home Dashboard iPad · V2.4.7
 
 Eine konfigurierbare Home-Assistant-Karte für ein übersichtliches Dashboard im Querformat. **Der öffentliche Code enthält keine Zuordnungen zu einer konkreten HA-Installation.** Entitäten werden im eigenen HA-Dashboard-YAML gespeichert und bleiben bei HACS-Updates erhalten.
 
 ![Dashboard mit ausschließlich synthetischen Beispieldaten](docs/demo.png)
+
+## Neu in V2.4.7
+
+- Einheitliche Y-Achsen aller vier Heizungsdiagramme von 18 bis 24 °C.
+- Horizontale Gitternetzlinien im Abstand von 1 °C.
+- Verbesserte Vergleichbarkeit der Temperaturverläufe zwischen den Räumen.
+- Temperaturkurven außerhalb des definierten Wertebereichs werden grafisch abgeschnitten. Die tatsächlichen Messwerte bleiben unverändert.
+
+Keine Änderungen an der lokalen YAML-Konfiguration erforderlich.
 
 ## Neu in V2.4.6
 
