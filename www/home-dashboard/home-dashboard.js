@@ -1,4 +1,4 @@
-import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries, heatingIntervals} from './data.js?v=2.4.6';
+import {escapeHTML as esc, dayKey, dayWindow, midnight, numberState, selectPrices, calendarEvents, historyExtrema, temperatureValue, heatingActivity, heatingSeries, heatingIntervals} from './data.js?v=2.4.7';
 
 const VERSION='2.4.7';
 const DEFAULT_ENTITIES={"current_price": null, "pv_power": null, "pv_energy_today": null, "electricity_consumption_today": null, "electricity_cost_today": null, "vehicle_range": null, "vehicle_soc": null, "vehicle_plug": null, "vehicle_charging": null, "vehicle_target_soc": null, "vehicle_charged_today": null};
